@@ -36,7 +36,7 @@ def log_timestamp(bin_num, style, step_name):
     sheet = client.open(SHEET_NAME).sheet1
     
     # If the sheet is completely empty, add header row
-    if len(sheet.head(1)) == 0:
+    if len(sheet.row_values(1)) == 0:
         sheet.append_row(["Bin_Number", "Style", "Step", "Timestamp"])
         
     # Lock timestamps to South African standard time
