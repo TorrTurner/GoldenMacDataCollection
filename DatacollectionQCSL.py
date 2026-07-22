@@ -16,7 +16,8 @@ STEPS = [
     "Moisture_Test_End",
     "SizingTest_End",
     "UnsoundSorting_End",
-    "HMI_End"
+    "HMI_End",
+    "Reporting_End"
 ]
 
 # ==========================================
