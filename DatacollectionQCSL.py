@@ -121,7 +121,7 @@ if st.session_state.current_step == -1:
     st.header("Start New Batch")
     
     # Pre-fill with the remembered clock number
-    clock_input = st.text_input("Enter Clock Number:", value=st.session_state.clock_number)
+    clock_input = st.text_input("Enter Your Name:", value=st.session_state.clock_number)
     bin_input = st.text_input("Enter Bin Number:")
     style_input = st.selectbox("Select Style:", STYLES)
     
