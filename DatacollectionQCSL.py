@@ -64,23 +64,23 @@ def get_gsheet_client():
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     return gspread.authorize(creds)
 
-def log_timestamp(batch_id, clock_num, bin_num, style, step_name):
+def log_timestamp(batch_id, operator_name, bin_num, style, step_name):
     client = get_gsheet_client()
     sheet = client.open(SHEET_NAME).sheet1
     
     if len(sheet.row_values(1)) == 0:
-        sheet.append_row(["Batch_ID", "Clock_Number", "Bin_Number", "Style", "Step", "Timestamp"])
+        sheet.append_row(["Batch_ID", "Name", "Bin_Number", "Style", "Step", "Timestamp"])
         
     tz = pytz.timezone('Africa/Johannesburg')
     current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
     
-    sheet.append_row([batch_id, clock_num, bin_num, style, step_name, current_time])
+    sheet.append_row([batch_id, operator_name, bin_num, style, step_name, current_time])
 
 # ==========================================
-# 2. STATE RECOVERY (Persistent Clock Number)
+# 2. STATE RECOVERY (Persistent Name)
 # ==========================================
-if 'clock_number' not in st.session_state:
-    st.session_state.clock_number = st.query_params.get("clock", "")
+if 'operator_name' not in st.session_state:
+    st.session_state.operator_name = st.query_params.get("name", "")
 
 if 'current_step' not in st.session_state:
     if "step" in st.query_params:
@@ -95,12 +95,10 @@ if 'current_step' not in st.session_state:
         st.session_state.style = STYLES[0]
 
 def sync_state_to_url():
-    # Always keep the clock number in the query params if present
-    if st.session_state.clock_number:
-        st.query_params["clock"] = st.session_state.clock_number
+    if st.session_state.operator_name:
+        st.query_params["name"] = st.session_state.operator_name
         
     if st.session_state.current_step == -1:
-        # Clear batch parameters but retain clock
         for param in ["step", "batch_id", "bin", "style"]:
             if param in st.query_params:
                 del st.query_params[param]
@@ -120,14 +118,13 @@ st.title("⏱️ QC Time Study")
 if st.session_state.current_step == -1:
     st.header("Start New Batch")
     
-    # Pre-fill with the remembered clock number
-    clock_input = st.text_input("Enter Your Name:", value=st.session_state.clock_number)
+    name_input = st.text_input("Enter Your Name:", value=st.session_state.operator_name)
     bin_input = st.text_input("Enter Bin Number:")
     style_input = st.selectbox("Select Style:", STYLES)
     
     if st.button("Start Recording", type="primary", use_container_width=True):
-        if clock_input and bin_input:
-            st.session_state.clock_number = clock_input
+        if name_input and bin_input:
+            st.session_state.operator_name = name_input
             st.session_state.batch_id = str(uuid.uuid4())[:8].upper()
             st.session_state.bin_number = bin_input
             st.session_state.style = style_input
@@ -135,13 +132,13 @@ if st.session_state.current_step == -1:
             sync_state_to_url()
             st.rerun()
         else:
-            st.error("Please enter both a Clock Number and a Bin Number first.")
+            st.error("Please enter both your Name and a Bin Number first.")
 
 # Phase 2: Recording sequence
 elif st.session_state.current_step < len(STEPS_INFO):
     current_step_info = STEPS_INFO[st.session_state.current_step]
     
-    st.info(f"**Operator:** {st.session_state.clock_number} | **Bin:** {st.session_state.bin_number} | **Style:** {st.session_state.style}")
+    st.info(f"**Operator:** {st.session_state.operator_name} | **Bin:** {st.session_state.bin_number} | **Style:** {st.session_state.style}")
     st.progress(st.session_state.current_step / len(STEPS_INFO))
     
     st.subheader(f"Step {st.session_state.current_step + 1} of {len(STEPS_INFO)}: {current_step_info['label']}")
@@ -151,7 +148,7 @@ elif st.session_state.current_step < len(STEPS_INFO):
         with st.spinner("Saving to Google Sheets..."):
             log_timestamp(
                 st.session_state.batch_id,
-                st.session_state.clock_number,
+                st.session_state.operator_name,
                 st.session_state.bin_number, 
                 st.session_state.style, 
                 current_step_info['name']
@@ -172,6 +169,5 @@ else:
         st.session_state.current_step = -1
         st.session_state.batch_id = ""
         st.session_state.bin_number = ""
-        # Note: clock_number is intentionally preserved here!
         sync_state_to_url()
         st.rerun()
