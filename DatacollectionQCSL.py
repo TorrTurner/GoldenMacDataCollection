@@ -26,7 +26,7 @@ STEPS_INFO = [
     {
         "name": "Looking_Unsound_ForeignMatter_In_Sample", 
         "label": "Searching through Sample for Unsound/Foreign Matter", 
-        "note": "Tap when you are done with the initial search for Unsound/Foreign Matte"
+        "note": "Tap when you are done with the initial search for Unsound/Foreign Matter"
     },
     {
         "name": "Moisture_Test_End", 
