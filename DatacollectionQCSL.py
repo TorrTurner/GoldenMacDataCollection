@@ -16,22 +16,27 @@ STEPS_INFO = [
     {
         "name": "QC_Start", 
         "label": "Start QC Process", 
-        "note": "Tap when the bin arrives at the QC station."
+        "note": "Tap you start the QC process for the bin."
     },
     {
         "name": "QC_Sample_Time_End", 
         "label": "Sample Time End", 
-        "note": "Tap when physical sample collection is finished."
+        "note": "Tap when you are done collecting the styling and unsound samples (1Kg/3Kg)"
+    },
+    {
+            "name": "Looking_Unsound_ForeignMatter_In_Sample", 
+            "label": "Searching through Sample for Unsound/Foreign Matter", 
+            "note": "Tap when you are done with the initial search for Unsound/Foreign Matte"
     },
     {
         "name": "Moisture_Test_End", 
         "label": "Moisture Test Complete", 
-        "note": "Tap when the moisture analyzer reading is finalized."
+        "note": "Tap when you have started the moisture anaylzer on the machine"
     },
     {
         "name": "SizingTest_End", 
         "label": "Sizing Test Complete", 
-        "note": "Tap when screen/sizing analysis is completed."
+        "note": "Tap when you are finished with the sizing test"
     },
     {
         "name": "UnsoundSorting_End", 
@@ -41,7 +46,12 @@ STEPS_INFO = [
     {
         "name": "HMI_End", 
         "label": "HMI Entry Complete", 
-        "note": "Tap when final data is entered into the HMI system."
+        "note": "Tap when you have finished inputing and getting the bin result on the HMI"
+    },
+    {
+        "name": "Reporting_End", 
+        "label": "Reporting Complete", 
+        "note": "Tap when final reporting and paperwork is completed."
     }
 ]
 
@@ -59,7 +69,6 @@ def log_timestamp(batch_id, clock_num, bin_num, style, step_name):
     client = get_gsheet_client()
     sheet = client.open(SHEET_NAME).sheet1
     
-    # If the sheet is empty, add the new header row including Clock_Number
     if len(sheet.row_values(1)) == 0:
         sheet.append_row(["Batch_ID", "Clock_Number", "Bin_Number", "Style", "Step", "Timestamp"])
         
@@ -69,7 +78,7 @@ def log_timestamp(batch_id, clock_num, bin_num, style, step_name):
     sheet.append_row([batch_id, clock_num, bin_num, style, step_name, current_time])
 
 # ==========================================
-# 2. STATE RECOVERY (With Clock Number)
+# 2. STATE RECOVERY 
 # ==========================================
 if 'current_step' not in st.session_state:
     if "step" in st.query_params:
@@ -125,11 +134,9 @@ if st.session_state.current_step == -1:
 elif st.session_state.current_step < len(STEPS_INFO):
     current_step_info = STEPS_INFO[st.session_state.current_step]
     
-    # Display active context
     st.info(f"**Operator:** {st.session_state.clock_number} | **Bin:** {st.session_state.bin_number} | **Style:** {st.session_state.style}")
     st.progress(st.session_state.current_step / len(STEPS_INFO))
     
-    # Clearer headers and operational notes
     st.subheader(f"Step {st.session_state.current_step + 1} of {len(STEPS_INFO)}: {current_step_info['label']}")
     st.markdown(f"> **Note:** {current_step_info['note']}")
     
