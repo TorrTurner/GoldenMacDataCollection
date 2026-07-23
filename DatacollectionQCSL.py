@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 
 # --- CONFIGURATION ---
 SHEET_NAME = "QC Time Study DB" 
-STYLES = ["Style 0", "Style 1", "Style 1", "Style 1S", "Style 4L", "Style 4LL", "Style 4S", "Style 6", "Stlye DC4", "Style DC5","Style DC6","Style SL"]
+STYLES = ["Style 0", "Style 1", "Style 1", "Style 1S", "Style 4L", "Style 4LL", "Style 4S", "Style 6", "Style DC4", "Style DC5","Style DC6","Style SL"]
 
 # Enhanced step definitions with clear descriptions/notes for the operator
 STEPS_INFO = [
