@@ -16,7 +16,7 @@ STEPS_INFO = [
     {
         "name": "QC_Start", 
         "label": "Start QC Process", 
-        "note": "Tap you start the QC process for the bin."
+        "note": "Tap when you start the QC process for the bin."
     },
     {
         "name": "QC_Sample_Time_End", 
