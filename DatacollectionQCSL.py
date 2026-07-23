@@ -24,14 +24,14 @@ STEPS_INFO = [
         "note": "Tap when you are done collecting the styling and unsound samples (1Kg/3Kg)"
     },
     {
-            "name": "Looking_Unsound_ForeignMatter_In_Sample", 
-            "label": "Searching through Sample for Unsound/Foreign Matter", 
-            "note": "Tap when you are done with the initial search for Unsound/Foreign Matte"
+        "name": "Looking_Unsound_ForeignMatter_In_Sample", 
+        "label": "Searching through Sample for Unsound/Foreign Matter", 
+        "note": "Tap when you are done with the initial search for Unsound/Foreign Matte"
     },
     {
         "name": "Moisture_Test_End", 
         "label": "Moisture Test Complete", 
-        "note": "Tap when you have started the moisture anaylzer on the machine"
+        "note": "Tap when you have started the moisture anaylses on the machine"
     },
     {
         "name": "SizingTest_End", 
