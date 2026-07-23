@@ -54,7 +54,6 @@ STEPS_INFO = [
         "note": "Tap when final reporting and paperwork is completed."
     }
 ]
-
 # ==========================================
 # 1. DATABASE CONNECTION
 # ==========================================
@@ -78,29 +77,36 @@ def log_timestamp(batch_id, clock_num, bin_num, style, step_name):
     sheet.append_row([batch_id, clock_num, bin_num, style, step_name, current_time])
 
 # ==========================================
-# 2. STATE RECOVERY 
+# 2. STATE RECOVERY (Persistent Clock Number)
 # ==========================================
+if 'clock_number' not in st.session_state:
+    st.session_state.clock_number = st.query_params.get("clock", "")
+
 if 'current_step' not in st.session_state:
     if "step" in st.query_params:
         st.session_state.current_step = int(st.query_params["step"])
         st.session_state.batch_id = st.query_params.get("batch_id", "")
-        st.session_state.clock_number = st.query_params.get("clock", "")
         st.session_state.bin_number = st.query_params.get("bin", "")
         st.session_state.style = st.query_params.get("style", STYLES[0])
     else:
         st.session_state.current_step = -1
         st.session_state.batch_id = ""
-        st.session_state.clock_number = ""
         st.session_state.bin_number = ""
         st.session_state.style = STYLES[0]
 
 def sync_state_to_url():
+    # Always keep the clock number in the query params if present
+    if st.session_state.clock_number:
+        st.query_params["clock"] = st.session_state.clock_number
+        
     if st.session_state.current_step == -1:
-        st.query_params.clear()
+        # Clear batch parameters but retain clock
+        for param in ["step", "batch_id", "bin", "style"]:
+            if param in st.query_params:
+                del st.query_params[param]
     else:
         st.query_params["step"] = st.session_state.current_step
         st.query_params["batch_id"] = st.session_state.batch_id
-        st.query_params["clock"] = st.session_state.clock_number
         st.query_params["bin"] = st.session_state.bin_number
         st.query_params["style"] = st.session_state.style
 
@@ -114,14 +120,15 @@ st.title("⏱️ QC Time Study")
 if st.session_state.current_step == -1:
     st.header("Start New Batch")
     
-    clock_input = st.text_input("Enter Clock Number:")
+    # Pre-fill with the remembered clock number
+    clock_input = st.text_input("Enter Clock Number:", value=st.session_state.clock_number)
     bin_input = st.text_input("Enter Bin Number:")
     style_input = st.selectbox("Select Style:", STYLES)
     
     if st.button("Start Recording", type="primary", use_container_width=True):
         if clock_input and bin_input:
-            st.session_state.batch_id = str(uuid.uuid4())[:8].upper()
             st.session_state.clock_number = clock_input
+            st.session_state.batch_id = str(uuid.uuid4())[:8].upper()
             st.session_state.bin_number = bin_input
             st.session_state.style = style_input
             st.session_state.current_step = 0
@@ -164,7 +171,7 @@ else:
     if st.button("Start Next Batch", type="primary", use_container_width=True):
         st.session_state.current_step = -1
         st.session_state.batch_id = ""
-        st.session_state.clock_number = ""
         st.session_state.bin_number = ""
+        # Note: clock_number is intentionally preserved here!
         sync_state_to_url()
         st.rerun()
